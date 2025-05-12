@@ -395,12 +395,20 @@ bool SlamToolbox::updateMap()
   if (sst_->get_subscription_count() == 0) {
     return true;
   }
-  boost::mutex::scoped_lock lock(smapper_mutex_);
-  OccupancyGrid * occ_grid = smapper_->getOccupancyGrid(resolution_);
+  LocalizedRangeScanVector all_processed_scans;
+  kt_int32u min_pass_through = 0;
+  kt_double occupancy_threshold = 0.0;
+  {
+    boost::mutex::scoped_lock lock(smapper_mutex_);
+    auto all_scans = smapper_->getMapper()->GetAllProcessedScans();
+    min_pass_through = (kt_int32u)smapper_->getMapper()->getParamMinPassThrough();
+    occupancy_threshold = (kt_double)smapper_->getMapper()->getParamOccupancyThreshold();
+  }
+  OccupancyGrid *occ_grid = OccupancyGrid::CreateFromScans(
+    all_processed_scans, (kt_double)resolution_, min_pass_through, occupancy_threshold);
   if (!occ_grid) {
     return false;
   }
-
   vis_utils::toNavMap(occ_grid, map_.map);
 
   // publish map as current
