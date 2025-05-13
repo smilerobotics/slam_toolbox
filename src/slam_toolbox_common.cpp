@@ -401,6 +401,9 @@ bool SlamToolbox::updateMap()
   {
     boost::mutex::scoped_lock lock(smapper_mutex_);
     for (const LocalizedRangeScan* scan : smapper_->getMapper()->GetAllProcessedScans()) {
+      if (!scan) {
+        continue;
+      }
       LocalizedRangeScan* const copied_scan = new LocalizedRangeScan(
         scan->GetSensorName(), scan->GetRangeReadingsVector());
       copied_scan->SetOdometricPose(scan->GetOdometricPose());
