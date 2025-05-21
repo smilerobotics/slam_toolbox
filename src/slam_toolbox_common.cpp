@@ -395,12 +395,33 @@ bool SlamToolbox::updateMap()
   if (sst_->get_subscription_count() == 0) {
     return true;
   }
-  boost::mutex::scoped_lock lock(smapper_mutex_);
-  OccupancyGrid * occ_grid = smapper_->getOccupancyGrid(resolution_);
+  LocalizedRangeScanVector all_processed_scans;
+  kt_int32u min_pass_through = 0;
+  kt_double occupancy_threshold = 0.0;
+  {
+    boost::mutex::scoped_lock lock(smapper_mutex_);
+    for (const LocalizedRangeScan* scan : smapper_->getMapper()->GetAllProcessedScans()) {
+      if (!scan) {
+        continue;
+      }
+      LocalizedRangeScan* const copied_scan = new LocalizedRangeScan(
+        scan->GetSensorName(), scan->GetRangeReadingsVector());
+      copied_scan->SetOdometricPose(scan->GetOdometricPose());
+      copied_scan->SetCorrectedPose(scan->GetCorrectedPose());
+      copied_scan->SetTime(scan->GetTime());
+      all_processed_scans.push_back(copied_scan);
+    }
+    min_pass_through = (kt_int32u)smapper_->getMapper()->getParamMinPassThrough();
+    occupancy_threshold = (kt_double)smapper_->getMapper()->getParamOccupancyThreshold();
+  }
+  OccupancyGrid *occ_grid = OccupancyGrid::CreateFromScans(
+    all_processed_scans, (kt_double)resolution_, min_pass_through, occupancy_threshold);
+  for (auto & scan : all_processed_scans) {
+    delete scan;
+  }
   if (!occ_grid) {
     return false;
   }
-
   vis_utils::toNavMap(occ_grid, map_.map);
 
   // publish map as current
