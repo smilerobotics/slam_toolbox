@@ -369,6 +369,13 @@ void SMapper::configure(const rclcpp::Node::SharedPtr & node)
   }
   node->get_parameter("occupancy_threshold", occupancy_threshold);
   mapper_->setParamOccupancyThreshold(occupancy_threshold);
+
+  int maximum_near_chain_link_size = std::numeric_limits<kt_int32u>::max();
+  if (!node->has_parameter("maximum_near_chain_link_size")) {
+    node->declare_parameter("maximum_near_chain_link_size", maximum_near_chain_link_size);
+  }
+  node->get_parameter("maximum_near_chain_link_size", maximum_near_chain_link_size);
+  mapper_->setParamMaximumNearChainLinkSize(maximum_near_chain_link_size);
 }
 
 /*****************************************************************************/

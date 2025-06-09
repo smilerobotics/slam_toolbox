@@ -2364,6 +2364,8 @@ protected:
   // Minimum ratio of beams hitting cell to beams passing through cell to be marked as occupied
   Parameter<kt_double> * m_pOccupancyThreshold;
 
+  Parameter<kt_int32u> * m_pMaximumNearChainLinkSize;
+
   friend class boost::serialization::access;
   template<class Archive>
   void serialize(Archive & ar, const unsigned int version)
@@ -2456,6 +2458,7 @@ public:
   bool getParamUseResponseExpansion();
   int getParamMinPassThrough();
   double getParamOccupancyThreshold();
+  int getParamMaximumNearChainLinkSize();
 
   /* Setters */
   // General Parameters
@@ -2496,6 +2499,7 @@ public:
   void setParamUseResponseExpansion(bool b);
   void setParamMinPassThrough(int i);
   void setParamOccupancyThreshold(double d);
+  void setParamMaximumNearChainLinkSize(int i);
 };
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(Mapper)
 }  // namespace karto
