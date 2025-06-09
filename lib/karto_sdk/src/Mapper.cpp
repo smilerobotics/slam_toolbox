@@ -1641,6 +1641,7 @@ void MapperGraph::LinkNearChains(
   std::vector<Matrix3> & rCovariances)
 {
   const std::vector<LocalizedRangeScanVector> nearChains = FindNearChains(pScan);
+  kt_int32u linkedScans = 0;
   const_forEach(std::vector<LocalizedRangeScanVector>, &nearChains)
   {
     if (iter->size() < m_pMapper->m_pLoopMatchMinimumChainSize->GetValue()) {
@@ -1656,6 +1657,11 @@ void MapperGraph::LinkNearChains(
       rMeans.push_back(mean);
       rCovariances.push_back(covariance);
       LinkChainToScan(*iter, pScan, mean, covariance);
+      ++linkedScans;
+      if (linkedScans >= m_pMapper->m_pMaximumNearChainLinkSize->GetValue()) {
+        // stop searching for more chains
+        break;
+      }
     }
   }
 }
@@ -2303,6 +2309,12 @@ void Mapper::InitializeParameters()
     "OccupancyThreshold",
     "Minimum ratio of beams hitting cell to beams passing through cell to be marked as occupied",
     0.1, GetParameterManager());
+
+  m_pMaximumNearChainLinkSize = new Parameter<kt_int32u>(
+    "MaximumNearChainLinkSize",
+    "Maximum number of scans in a near chain.  If the number of scans in a "
+    "near chain exceeds this value, the chain will not be used for linking.",
+    std::numeric_limits<kt_int32u>::max(), GetParameterManager());
 }
 /* Adding in getters and setters here for easy parameter access */
 
@@ -2469,6 +2481,12 @@ double Mapper::getParamOccupancyThreshold()
   return static_cast<double>(m_pOccupancyThreshold->GetValue());
 }
 
+int Mapper::getParamMaximumNearChainLinkSize()
+{
+  return static_cast<int>(m_pMaximumNearChainLinkSize->GetValue());
+}
+
+
 /* Setters for parameters */
 // General Parameters
 void Mapper::setParamUseScanMatching(bool b)
@@ -2631,6 +2649,10 @@ void Mapper::setParamOccupancyThreshold(double d)
   m_pOccupancyThreshold->SetValue((kt_double)d);
 }
 
+void Mapper::setParamMaximumNearChainLinkSize(int i)
+{
+  m_pMaximumNearChainLinkSize->SetValue((kt_int32u)i);
+}
 
 void Mapper::Initialize(kt_double rangeThreshold)
 {
