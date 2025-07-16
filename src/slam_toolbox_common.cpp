@@ -404,12 +404,7 @@ bool SlamToolbox::updateMap()
       if (!scan) {
         continue;
       }
-      LocalizedRangeScan* const copied_scan = new LocalizedRangeScan(
-        scan->GetSensorName(), scan->GetRangeReadingsVector());
-      copied_scan->SetOdometricPose(scan->GetOdometricPose());
-      copied_scan->SetCorrectedPose(scan->GetCorrectedPose());
-      copied_scan->SetTime(scan->GetTime());
-      all_processed_scans.push_back(copied_scan);
+      all_processed_scans.push_back(scan->Clone());
     }
     min_pass_through = (kt_int32u)smapper_->getMapper()->getParamMinPassThrough();
     occupancy_threshold = (kt_double)smapper_->getMapper()->getParamOccupancyThreshold();
