@@ -49,6 +49,7 @@ BOOST_CLASS_EXPORT_IMPLEMENT(karto::Parameter<kt_bool>);
 BOOST_CLASS_EXPORT_IMPLEMENT(karto::Parameter<kt_int32u>);
 BOOST_CLASS_EXPORT_IMPLEMENT(karto::Parameter<kt_int32s>);
 BOOST_CLASS_EXPORT_IMPLEMENT(karto::Parameter<std::string>);
+BOOST_CLASS_EXPORT_IMPLEMENT(karto::LocalizedRangeScanWithPoints);
 namespace karto
 {
 
@@ -81,6 +82,14 @@ Object::~Object()
 {
   delete m_pParameterManager;
   m_pParameterManager = NULL;
+}
+
+void Object::CloneImpl(Object & rNewObject) const
+{
+  rNewObject.m_Name = m_Name;
+  for (const auto & parameter : m_pParameterManager->GetParameterVector()) {
+    rNewObject.m_pParameterManager->Add(parameter->Clone());
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -131,6 +140,15 @@ SensorData::~SensorData()
   }
 
   m_CustomData.clear();
+}
+
+void SensorData::CloneImpl(SensorData & rNewSensorData) const
+{
+  Object::CloneImpl(rNewSensorData);
+  rNewSensorData.m_StateId = m_StateId;
+  rNewSensorData.m_UniqueId = m_UniqueId;
+  rNewSensorData.m_SensorName = m_SensorName;
+  rNewSensorData.m_Time = m_Time;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

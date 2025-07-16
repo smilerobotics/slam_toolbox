@@ -699,6 +699,9 @@ public:
   Object(const Object &);
   const Object & operator=(const Object &);
 
+protected:
+  void CloneImpl(Object & rNewObject) const;
+
 private:
   Name m_Name;
   ParameterManager * m_pParameterManager;
@@ -5135,6 +5138,8 @@ protected:
    */
   SensorData(const Name & rSensorName);  // NOLINT
 
+  void CloneImpl(SensorData & rNewSensorData) const;
+
 private:
   /**
    * Restrict the copy constructor
@@ -5313,6 +5318,13 @@ public:
   inline kt_int32u GetNumberOfRangeReadings() const
   {
     return m_NumberOfRangeReadings;
+  }
+
+protected:
+  void CloneImpl(LaserRangeScan & rNewScan) const
+  {
+    SensorData::CloneImpl(rNewScan);
+    rNewScan.SetRangeReadings(GetRangeReadingsVector());
   }
 
 private:
@@ -5636,6 +5648,27 @@ public:
     }
   }
 
+  virtual LocalizedRangeScan * Clone() const
+  {
+    LocalizedRangeScan * const pNewScan =
+        new LocalizedRangeScan(GetSensorName(), GetRangeReadingsVector());
+    CloneImpl(*pNewScan);
+    return pNewScan;
+  }
+
+protected:
+  void CloneImpl(LocalizedRangeScan & rNewScan) const
+  {
+    LaserRangeScan::CloneImpl(rNewScan);
+    rNewScan.m_OdometricPose = m_OdometricPose;
+    rNewScan.m_CorrectedPose = m_CorrectedPose;
+    rNewScan.m_BarycenterPose = m_BarycenterPose;
+    rNewScan.m_PointReadings = m_PointReadings;
+    rNewScan.m_UnfilteredPointReadings = m_UnfilteredPointReadings;
+    rNewScan.m_BoundingBox = m_BoundingBox;
+    rNewScan.m_IsDirty = m_IsDirty;
+  }
+
 private:
   /**
    * Compute point readings based on range readings
@@ -5794,11 +5827,22 @@ public:
   {
   }
 
+  LocalizedRangeScanWithPoints()
+  {}
+
   /**
    * Destructor
    */
   virtual ~LocalizedRangeScanWithPoints()
   {
+  }
+
+  virtual LocalizedRangeScan * Clone() const
+  {
+    LocalizedRangeScanWithPoints * const pNewScan =
+      new LocalizedRangeScanWithPoints(GetSensorName(), GetRangeReadingsVector(), m_Points);
+    LocalizedRangeScan::CloneImpl(*pNewScan);
+    return pNewScan;
   }
 
 private:
@@ -5859,8 +5903,16 @@ private:
   LocalizedRangeScanWithPoints(const LocalizedRangeScanWithPoints &);
   const LocalizedRangeScanWithPoints & operator=(const LocalizedRangeScanWithPoints &);
 
+  friend class boost::serialization::access;
+  template<class Archive>
+  void serialize(Archive & ar, const unsigned int version)
+  {
+    ar & BOOST_SERIALIZATION_NVP(m_Points);
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(LocalizedRangeScan);
+  }
+
 private:
-  const PointVectorDouble m_Points;
+  PointVectorDouble m_Points;
 };    // LocalizedRangeScanWithPoints
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -7039,5 +7091,6 @@ BOOST_CLASS_EXPORT_KEY(karto::Parameter<kt_bool>);
 BOOST_CLASS_EXPORT_KEY(karto::Parameter<kt_int32u>);
 BOOST_CLASS_EXPORT_KEY(karto::Parameter<kt_int32s>);
 BOOST_CLASS_EXPORT_KEY(karto::Parameter<std::string>);
+BOOST_CLASS_EXPORT_KEY(karto::LocalizedRangeScanWithPoints);
 
 #endif  // KARTO_SDK__KARTO_H_
