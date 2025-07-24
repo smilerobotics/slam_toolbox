@@ -815,6 +815,19 @@ public:
    */
   void UpdateLoopScanMatcher(kt_double rangeThreshold);
 
+  /**
+   * Link the chain of scans to the given scan by finding the closest scan in the chain to the given scan
+   * @param rChain
+   * @param pScan
+   * @param rMean
+   * @param rCovariance
+   */
+  void LinkChainToScan(
+    const LocalizedRangeScanVector & rChain,
+    LocalizedRangeScan * pScan,
+    const Pose2 & rMean,
+    const Matrix3 & rCovariance);
+
 private:
   /**
    * Gets the vertex associated with the given scan
@@ -866,19 +879,6 @@ private:
   void LinkNearChains(
     LocalizedRangeScan * pScan, Pose2Vector & rMeans,
     std::vector<Matrix3> & rCovariances);
-
-  /**
-   * Link the chain of scans to the given scan by finding the closest scan in the chain to the given scan
-   * @param rChain
-   * @param pScan
-   * @param rMean
-   * @param rCovariance
-   */
-  void LinkChainToScan(
-    const LocalizedRangeScanVector & rChain,
-    LocalizedRangeScan * pScan,
-    const Pose2 & rMean,
-    const Matrix3 & rCovariance);
 
   /**
    * Find chains of scans that are close to given scan

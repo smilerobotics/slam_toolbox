@@ -299,7 +299,7 @@ LocalizedRangeScan * MapperSensorManager::GetScan(const Name & rSensorName, kt_i
  * @param pLaserRangeFinder
  * @return last localized range scan of device
  */
-inline LocalizedRangeScan * MapperSensorManager::GetLastScan(const Name & rSensorName)
+LocalizedRangeScan * MapperSensorManager::GetLastScan(const Name & rSensorName)
 {
   RegisterSensor(rSensorName);
 
@@ -348,7 +348,7 @@ void MapperSensorManager::AddScan(LocalizedRangeScan * pScan)
  * Adds scan to running scans of device that recorded scan
  * @param pScan
  */
-inline void MapperSensorManager::AddRunningScan(LocalizedRangeScan * pScan)
+void MapperSensorManager::AddRunningScan(LocalizedRangeScan * pScan)
 {
   GetScanManager(pScan)->AddRunningScan(pScan);
 }
@@ -375,7 +375,7 @@ void MapperSensorManager::RemoveScan(LocalizedRangeScan * pScan)
  * @param rSensorName
  * @return scans of device
  */
-inline LocalizedRangeScanMap & MapperSensorManager::GetScans(const Name & rSensorName)
+LocalizedRangeScanMap & MapperSensorManager::GetScans(const Name & rSensorName)
 {
   return GetScanManager(rSensorName)->GetScans();
 }
@@ -385,7 +385,7 @@ inline LocalizedRangeScanMap & MapperSensorManager::GetScans(const Name & rSenso
  * @param rSensorName
  * @return running scans of device
  */
-inline LocalizedRangeScanVector & MapperSensorManager::GetRunningScans(const Name & rSensorName)
+LocalizedRangeScanVector & MapperSensorManager::GetRunningScans(const Name & rSensorName)
 {
   return GetScanManager(rSensorName)->GetRunningScans();
 }
@@ -395,7 +395,7 @@ void MapperSensorManager::ClearRunningScans(const Name & rSensorName)
   GetScanManager(rSensorName)->ClearRunningScans();
 }
 
-inline kt_int32u MapperSensorManager::GetRunningScanBufferSize(const Name & rSensorName)
+kt_int32u MapperSensorManager::GetRunningScanBufferSize(const Name & rSensorName)
 {
   return GetScanManager(rSensorName)->GetRunningScanBufferSize();
 }
