@@ -1650,8 +1650,10 @@ void MapperGraph::LinkNearChains(
   std::vector<size_t> chainIndices(nearChains.size());
   std::iota(chainIndices.begin(), chainIndices.end(), 0);
   if (m_pMapper->m_pRandomizeNearChainOrder->GetValue()) {
-    static thread_local std::mt19937 gen{std::random_device{}()};
-    std::shuffle(chainIndices.begin(), chainIndices.end(), gen);
+    if (m_NearChainShuffleGen == std::mt19937{}) {
+      m_NearChainShuffleGen.seed(std::random_device{}());
+    }
+    std::shuffle(chainIndices.begin(), chainIndices.end(), m_NearChainShuffleGen);
   }
   for (const size_t index : chainIndices) {
     const LocalizedRangeScanVector & chain = nearChains[index];
@@ -1662,7 +1664,7 @@ void MapperGraph::LinkNearChains(
     Pose2 mean;
     Matrix3 covariance;
     // match scan against "near" chain
-    const kt_double response = m_pMapper->m_pSequentialScanMatcher->MatchScan(pScan, chain, mean,
+    kt_double response = m_pMapper->m_pSequentialScanMatcher->MatchScan(pScan, chain, mean,
         covariance, false);
     if (response > m_pMapper->m_pLinkMatchMinimumResponseFine->GetValue() - KT_TOLERANCE) {
       rMeans.push_back(mean);

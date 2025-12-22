@@ -926,6 +926,9 @@ private:
    */
   GraphTraversal<LocalizedRangeScan> * m_pTraversal;
 
+  // Random generator for near chain shuffling (not serialized)
+  std::mt19937 m_NearChainShuffleGen;
+
   /**
    * Serialization: class MapperGraph
    */
@@ -941,6 +944,7 @@ private:
     ar & BOOST_SERIALIZATION_NVP(m_pLoopScanMatcher);
     std::cout << "MapperGraph <- m_pTraversal\n";
     ar & BOOST_SERIALIZATION_NVP(m_pTraversal);
+    // m_NearChainShuffleGen is intentionally not serialized
   }
 };    // MapperGraph
 
