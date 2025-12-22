@@ -1403,6 +1403,7 @@ MapperGraph::MapperGraph(Mapper * pMapper, kt_double rangeThreshold)
   assert(m_pLoopScanMatcher);
 
   m_pTraversal = new BreadthFirstTraversal<LocalizedRangeScan>(this);
+  m_pNearChainShuffleGen = new std::mt19937(std::random_device{}());
 }
 
 MapperGraph::~MapperGraph()
@@ -1414,6 +1415,10 @@ MapperGraph::~MapperGraph()
   if (m_pTraversal) {
     delete m_pTraversal;
     m_pTraversal = NULL;
+  }
+  if (m_pNearChainShuffleGen) {
+    delete m_pNearChainShuffleGen;
+    m_pNearChainShuffleGen = NULL;
   }
 }
 
@@ -1650,10 +1655,7 @@ void MapperGraph::LinkNearChains(
   std::vector<size_t> chainIndices(nearChains.size());
   std::iota(chainIndices.begin(), chainIndices.end(), 0);
   if (m_pMapper->m_pRandomizeNearChainOrder->GetValue()) {
-    if (m_NearChainShuffleGen == std::mt19937{}) {
-      m_NearChainShuffleGen.seed(std::random_device{}());
-    }
-    std::shuffle(chainIndices.begin(), chainIndices.end(), m_NearChainShuffleGen);
+    std::shuffle(chainIndices.begin(), chainIndices.end(), *m_pNearChainShuffleGen);
   }
   for (const size_t index : chainIndices) {
     const LocalizedRangeScanVector & chain = nearChains[index];

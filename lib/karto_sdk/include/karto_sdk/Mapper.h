@@ -26,6 +26,7 @@
 #include <chrono>
 #include <utility>
 #include <string>
+#include <random>
 
 #include "tbb/parallel_for_each.h"
 #include "tbb/parallel_for.h"
@@ -927,7 +928,7 @@ private:
   GraphTraversal<LocalizedRangeScan> * m_pTraversal;
 
   // Random generator for near chain shuffling (not serialized)
-  std::mt19937 m_NearChainShuffleGen;
+  std::mt19937 * m_pNearChainShuffleGen;
 
   /**
    * Serialization: class MapperGraph
@@ -944,7 +945,7 @@ private:
     ar & BOOST_SERIALIZATION_NVP(m_pLoopScanMatcher);
     std::cout << "MapperGraph <- m_pTraversal\n";
     ar & BOOST_SERIALIZATION_NVP(m_pTraversal);
-    // m_NearChainShuffleGen is intentionally not serialized
+    // m_pNearChainShuffleGen is intentionally not serialized
   }
 };    // MapperGraph
 
