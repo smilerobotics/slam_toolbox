@@ -2333,10 +2333,12 @@ void Mapper::InitializeParameters()
 
   m_pRandomizeNearChainOrder = new Parameter<kt_bool>(
     "RandomizeNearChainOrder",
-    "Randomize the order of near chain links for loop closure.",
+    "Randomize the order of near chain links for loop closure. Use this in conjunction with "
+    "MaximumNearChainLinkSize to avoid repeatedly evaluating the same subset of links.",
     false, GetParameterManager());
 }
 /* Adding in getters and setters here for easy parameter access */
+
 
 // General Parameters
 
