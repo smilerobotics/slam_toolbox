@@ -2366,6 +2366,8 @@ protected:
 
   Parameter<kt_int32u> * m_pMaximumNearChainLinkSize;
 
+  Parameter<kt_bool> * m_pRandomizeNearChainOrder;
+
   friend class boost::serialization::access;
   template<class Archive>
   void serialize(Archive & ar, const unsigned int version)
@@ -2459,6 +2461,7 @@ public:
   int getParamMinPassThrough();
   double getParamOccupancyThreshold();
   int getParamMaximumNearChainLinkSize();
+  bool getParamRandomizeNearChainOrder();
 
   /* Setters */
   // General Parameters
@@ -2500,6 +2503,7 @@ public:
   void setParamMinPassThrough(int i);
   void setParamOccupancyThreshold(double d);
   void setParamMaximumNearChainLinkSize(int i);
+  void setParamRandomizeNearChainOrder(bool b);
 };
 BOOST_SERIALIZATION_ASSUME_ABSTRACT(Mapper)
 }  // namespace karto

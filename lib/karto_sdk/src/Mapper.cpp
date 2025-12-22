@@ -32,6 +32,8 @@
 #include <utility>
 #include <algorithm>
 #include <string>
+#include <numeric>
+#include <random>
 
 #include "karto_sdk/Mapper.h"
 
@@ -1641,22 +1643,31 @@ void MapperGraph::LinkNearChains(
   std::vector<Matrix3> & rCovariances)
 {
   const std::vector<LocalizedRangeScanVector> nearChains = FindNearChains(pScan);
+  if (nearChains.empty()) {
+    return;
+  }
   kt_int32u linkedScans = 0;
-  const_forEach(std::vector<LocalizedRangeScanVector>, &nearChains)
-  {
-    if (iter->size() < m_pMapper->m_pLoopMatchMinimumChainSize->GetValue()) {
+  std::vector<size_t> chainIndices(nearChains.size());
+  std::iota(chainIndices.begin(), chainIndices.end(), 0);
+  if (m_pMapper->m_pRandomizeNearChainOrder->GetValue()) {
+    static thread_local std::mt19937 gen{std::random_device{}()};
+    std::shuffle(chainIndices.begin(), chainIndices.end(), gen);
+  }
+  for (size_t idx : chainIndices) {
+    const LocalizedRangeScanVector & chain = nearChains[idx];
+    if (chain.size() < m_pMapper->m_pLoopMatchMinimumChainSize->GetValue()) {
       continue;
     }
 
     Pose2 mean;
     Matrix3 covariance;
     // match scan against "near" chain
-    kt_double response = m_pMapper->m_pSequentialScanMatcher->MatchScan(pScan, *iter, mean,
+    kt_double response = m_pMapper->m_pSequentialScanMatcher->MatchScan(pScan, chain, mean,
         covariance, false);
     if (response > m_pMapper->m_pLinkMatchMinimumResponseFine->GetValue() - KT_TOLERANCE) {
       rMeans.push_back(mean);
       rCovariances.push_back(covariance);
-      LinkChainToScan(*iter, pScan, mean, covariance);
+      LinkChainToScan(chain, pScan, mean, covariance);
       ++linkedScans;
       if (linkedScans >= m_pMapper->m_pMaximumNearChainLinkSize->GetValue()) {
         // stop searching for more chains
@@ -2315,6 +2326,11 @@ void Mapper::InitializeParameters()
     "Maximum number of scans in a near chain.  If the number of scans in a "
     "near chain exceeds this value, the chain will not be used for linking.",
     std::numeric_limits<kt_int32u>::max(), GetParameterManager());
+
+  m_pRandomizeNearChainOrder = new Parameter<kt_bool>(
+    "RandomizeNearChainOrder",
+    "Randomize the order of near chain links for loop closure.",
+    false, GetParameterManager());
 }
 /* Adding in getters and setters here for easy parameter access */
 
@@ -2486,6 +2502,10 @@ int Mapper::getParamMaximumNearChainLinkSize()
   return static_cast<int>(m_pMaximumNearChainLinkSize->GetValue());
 }
 
+bool Mapper::getParamRandomizeNearChainOrder()
+{
+  return static_cast<bool>(m_pRandomizeNearChainOrder->GetValue());
+}
 
 /* Setters for parameters */
 // General Parameters
@@ -2652,6 +2672,11 @@ void Mapper::setParamOccupancyThreshold(double d)
 void Mapper::setParamMaximumNearChainLinkSize(int i)
 {
   m_pMaximumNearChainLinkSize->SetValue((kt_int32u)i);
+}
+
+void Mapper::setParamRandomizeNearChainOrder(bool b)
+{
+  m_pRandomizeNearChainOrder->SetValue((kt_bool)b);
 }
 
 void Mapper::Initialize(kt_double rangeThreshold)

@@ -355,7 +355,6 @@ void SMapper::configure(const rclcpp::Node::SharedPtr & node)
   node->get_parameter("use_response_expansion", use_response_expansion);
   mapper_->setParamUseResponseExpansion(use_response_expansion);
 
-
   int min_pass_through = 2;
   if (!node->has_parameter("min_pass_through")) {
     node->declare_parameter("min_pass_through", min_pass_through);
@@ -376,6 +375,13 @@ void SMapper::configure(const rclcpp::Node::SharedPtr & node)
   }
   node->get_parameter("maximum_near_chain_link_size", maximum_near_chain_link_size);
   mapper_->setParamMaximumNearChainLinkSize(maximum_near_chain_link_size);
+
+  bool randomize_near_chain_order = false;
+  if (!node->has_parameter("randomize_near_chain_order")) {
+    node->declare_parameter("randomize_near_chain_order", randomize_near_chain_order);
+  }
+  node->get_parameter("randomize_near_chain_order", randomize_near_chain_order);
+  mapper_->setParamRandomizeNearChainOrder(randomize_near_chain_order);
 }
 
 /*****************************************************************************/
