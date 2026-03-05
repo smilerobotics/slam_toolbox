@@ -25,12 +25,7 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-find_package(rviz_common REQUIRED)
-find_package(rviz_default_plugins REQUIRED)
-find_package(rviz_ogre_vendor REQUIRED)
-find_package(rviz_rendering REQUIRED)
 find_package(interactive_markers REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Test Concurrent)
 find_package(rclcpp_components REQUIRED)
 
 #karto_sdk lib
@@ -53,18 +48,12 @@ set(dependencies
   std_msgs
   std_srvs
   builtin_interfaces
-  rviz_common
-  rviz_default_plugins
-  rviz_ogre_vendor
-  rviz_rendering
   interactive_markers
-  Qt5
   rclcpp_components
 )
 
 set(libraries
     toolbox_common
-    SlamToolboxPlugin
     ceres_solver_plugin
     async_slam_toolbox
     sync_slam_toolbox
@@ -82,7 +71,6 @@ find_package(LAPACK REQUIRED)
 find_package(Ceres REQUIRED COMPONENTS SuiteSparse)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-add_definitions(-DQT_NO_KEYWORDS)
 find_package(Boost REQUIRED system serialization filesystem thread)
 
 include_directories(include lib/karto_sdk/include
@@ -108,25 +96,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   srv/SerializePoseGraph.srv
   DEPENDENCIES builtin_interfaces geometry_msgs std_msgs nav_msgs visualization_msgs
 )
-
-#### rviz Plugin
-qt5_wrap_cpp(MOC_FILES rviz_plugin/slam_toolbox_rviz_plugin.hpp)
-add_library(SlamToolboxPlugin SHARED
-  rviz_plugin/slam_toolbox_rviz_plugin.cpp
-  ${MOC_FILES})
-ament_target_dependencies(SlamToolboxPlugin
- ${dependencies}
-)
-target_include_directories(SlamToolboxPlugin PUBLIC
-  ${Qt5Widgets_INCLUDE_DIRS}
-  ${OGRE_INCLUDE_DIRS}
-)
-target_link_libraries(SlamToolboxPlugin ${QT_LIBRARIES} rviz_common::rviz_common)
-rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
-target_link_libraries(SlamToolboxPlugin "${cpp_typesupport_target}")
-target_compile_definitions(SlamToolboxPlugin PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
-target_compile_definitions(SlamToolboxPlugin PRIVATE "RVIZ_DEFAULT_PLUGINS_BUILDING_LIBRARY")
-pluginlib_export_plugin_description_file(rviz_common rviz_plugins.xml) 
 
 #### Ceres Plugin
 add_library(ceres_solver_plugin solvers/ceres_solver.cpp)
@@ -208,8 +177,8 @@ install(TARGETS async_slam_toolbox_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
-install(TARGETS SlamToolboxPlugin
-  EXPORT SlamToolboxPlugin
+install(TARGETS kartoSlamToolbox
+  EXPORT kartoSlamToolbox
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -229,12 +198,12 @@ install(DIRECTORY config
   DESTINATION share/${PROJECT_NAME}
 )
 
-install(FILES solver_plugins.xml rviz_plugins.xml
+install(FILES solver_plugins.xml
   DESTINATION share
 )
 
 ament_export_include_directories(include)
 ament_export_libraries(${libraries} kartoSlamToolbox)
 ament_export_dependencies(${dependencies})
-ament_export_targets(SlamToolboxPlugin HAS_LIBRARY_TARGET)
+ament_export_targets(kartoSlamToolbox HAS_LIBRARY_TARGET)
 ament_package()
